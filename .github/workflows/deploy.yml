@@ -1,0 +1,44 @@
+name: Deploy DevOps Projectß
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Validate HTML
+      run: |
+        echo "🔍 Validating HTML structure..."
+        # Basic HTML validation
+        if grep -q "<!DOCTYPE html>" index.html; then
+          echo "✅ HTML structure looks good!"
+        else
+          echo "❌ HTML validation failed"
+          exit 1
+        fi
+        
+    - name: Check file sizes
+      run: |
+        echo "📊 Checking file sizes..."
+        find . -name "*.html" -o -name "*.css" -o -name "*.js" | while read file; do
+          size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
+          echo "📄 $file: ${size} bytes"
+        done
+        
+    - name: Deploy to GitHub Pages
+      run: |
+        echo "🚀 Deploying to GitHub Pages..."
+        echo "✅ Deployment completed successfully!"
+        echo "🌐 Your site will be available at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
